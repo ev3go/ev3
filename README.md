@@ -5,7 +5,7 @@
 
 The goal is to implement a simple Go style ev3dev API and helpers for common tasks.
 
-github.com/ev3go/ev3/ev3dev depends on an ev3dev kernel v3.16.7-ckt26-10-ev3dev-ev3 or better (See http://www.ev3dev.org/news/2016/04/11/Kernel-Release-Cycle-10/)
+github.com/ev3go/ev3 depends on an ev3dev kernel v3.16.7-ckt26-10-ev3dev-ev3 or better (See http://www.ev3dev.org/news/2016/04/11/Kernel-Release-Cycle-10/).
 
 ## Currently supported:
 
