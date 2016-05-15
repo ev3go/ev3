@@ -24,4 +24,4 @@ type led struct {
 	side  string
 }
 
-func (l led) String() string { return fmt.Sprintf("ev3:%s:%s", l.side, l.color) }
+func (l led) String() string { return fmt.Sprintf("ev3:%s:%s:ev3dev", l.side, l.color) }

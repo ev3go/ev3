@@ -1,30 +1,41 @@
 ![Gopherbrick](gopherbrick.png)
-# ev3 is an idiomatic Go interface to an ev3dev device
+# ev3 provides EV3-specific functions for the Go ev3dev interface
 
 [![Build Status](https://travis-ci.org/ev3go/ev3.svg?branch=master)](https://travis-ci.org/ev3go/ev3) [![Coverage Status](https://coveralls.io/repos/ev3go/ev3/badge.svg?branch=master&service=github)](https://coveralls.io/github/ev3go/ev3?branch=master) [![GoDoc](https://godoc.org/github.com/ev3go/ev3?status.svg)](https://godoc.org/github.com/ev3go/ev3)
 
-The goal is to implement a simple Go style ev3dev API and helpers for common tasks.
+github.com/ev3go/ev3 depends on an ev3dev kernel 4.4.9-11-ev3dev-ev3 or better.
 
-github.com/ev3go/ev3 depends on an ev3dev kernel v3.16.7-ckt26-10-ev3dev-ev3 or better (See http://www.ev3dev.org/news/2016/04/11/Kernel-Release-Cycle-10/).
+## Example code
 
-## Currently supported:
+```
+package main
 
-### Low level API
+import (
+	"log"
+	"time"
 
-- [x] Automatic identification of attached devices
-- [x] Buttons `/dev/input/by-path/platform-gpio-keys.0-event`
-- [x] Power supply `/sys/class/power_supply`
-- [x] LED `/sys/class/leds`
-- [x] LCD `/dev/fb0`
-- [x] Lego Port `/sys/class/lego-port`
-- [x] Sensor `/sys/class/lego-sensor`
-- [x] DC motor `/sys/class/dc-motor`
-- [x] Linear actuator `/sys/class/tacho-motor`
-- [x] Servo motor `/sys/class/servo-motor`
-- [x] Tacho motor `/sys/class/tacho-motor`
+	"github.com/ev3go/ev3"
+)
 
-### Common tasks
+func main() {
+	var bright byte
+	var err error
+	for i := 0; i < 10; i++ {
+		err = ev3.GreenLeft.SetBrightness(int(bright)).Err()
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(time.Second)
 
-None yet.
+		bright = ^bright
+
+		err = ev3.GreenRight.SetBrightness(int(bright)).Err()
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(time.Second)
+	}
+}
+```
 
 LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this software.
