@@ -7,7 +7,7 @@ package ev3
 import (
 	"fmt"
 
-	"github.com/ev3go/ev3/ev3dev"
+	"github.com/ev3go/ev3dev"
 )
 
 // LED handles for ev3 devices.
