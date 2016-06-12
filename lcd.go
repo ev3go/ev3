@@ -8,9 +8,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
-	"os"
-	"sync"
-	"syscall"
+	"image/draw"
 
 	"github.com/ev3go/ev3dev"
 )
@@ -29,87 +27,7 @@ const (
 // LCD is the draw image used draw directly to the ev3 LCD screen.
 // Drawing operations are safe for concurrent use, but are not atomic
 // beyond the pixel level. It must be initialized before use.
-var LCD ev3dev.FrameBuffer = new(lcd)
-
-// lcd is a reader/writer locked draw.Image.
-type lcd struct {
-	mu  sync.RWMutex
-	img *Monochrome
-	f   *os.File
-}
-
-func (p *lcd) Init(zero bool) error {
-	p.mu.RLock()
-	if p.f == nil {
-		p.mu.RUnlock()
-		return p.frameBuffer("/dev/fb0", zero)
-	}
-	p.mu.RUnlock()
-	if zero {
-		p.mu.Lock()
-		for i := 0; i < LCDHeight*LCDStride; i++ {
-			p.img.Pix[i] = 0
-		}
-		p.mu.Unlock()
-	}
-	return nil
-}
-
-func (p *lcd) Close() (err error) {
-	defer func() {
-		p.mu.Unlock()
-		_err := p.f.Close()
-		p.f = nil
-		if err == nil {
-			err = _err
-		}
-	}()
-	p.mu.Lock()
-	return syscall.Munmap(p.img.Pix)
-}
-
-func (p *lcd) frameBuffer(path string, zero bool) error {
-	defer p.mu.Unlock()
-	p.mu.Lock()
-	var err error
-	p.f, err = os.OpenFile(path, os.O_RDWR, 0)
-	if err != nil {
-		return err
-	}
-	fbdev, err := syscall.Mmap(int(p.f.Fd()), 0, LCDHeight*LCDStride, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
-	if err != nil {
-		return err
-	}
-	if zero {
-		for i := 0; i < LCDHeight*LCDStride; i++ {
-			fbdev[i] = 0
-		}
-	}
-	p.img, err = newMonochromeWith(fbdev, image.Rect(0, 0, LCDWidth, LCDHeight), LCDStride)
-	return err
-}
-
-func (p *lcd) ColorModel() color.Model { return p.img.ColorModel() }
-func (p *lcd) Bounds() image.Rectangle { return p.img.Bounds() }
-func (p *lcd) At(x, y int) color.Color {
-	defer p.mu.RUnlock()
-	p.mu.RLock()
-	if p.f == nil {
-		return nil
-	}
-	return p.img.At(x, y)
-}
-func (p *lcd) Set(x, y int, c color.Color) {
-	p.mu.RLock()
-	if p.f == nil {
-		p.mu.RUnlock()
-		return
-	}
-	p.mu.RUnlock()
-	p.mu.Lock()
-	p.img.Set(x, y, c)
-	p.mu.Unlock()
-}
+var LCD = ev3dev.NewFrameBuffer("/dev/fb0", newMonochromeWith, LCDWidth, LCDHeight, LCDStride)
 
 // NewMonochrome returns a new Monochrome image with the given bounds
 // and stride. If stride is zero, a working stride is computed.
@@ -125,7 +43,7 @@ func NewMonochrome(r image.Rectangle, stride int) *Monochrome {
 // newMonochromeWith returns a new Monochrome image with the given bounds
 // and stride, backed by the []byte, pix. If stride is zero, a working
 // stride is computed.
-func newMonochromeWith(pix []byte, r image.Rectangle, stride int) (*Monochrome, error) {
+func newMonochromeWith(pix []byte, r image.Rectangle, stride int) (draw.Image, error) {
 	w, h := r.Dx(), r.Dy()
 	if stride == 0 {
 		stride = (w + 7) / 8
