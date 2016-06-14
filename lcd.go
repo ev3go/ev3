@@ -42,13 +42,14 @@ func NewMonochrome(r image.Rectangle, stride int) *Monochrome {
 
 // newMonochromeWith returns a new Monochrome image with the given bounds
 // and stride, backed by the []byte, pix. If stride is zero, a working
-// stride is computed.
+// stride is computed. If the length of pix is less than stride*h, an
+// error is returned.
 func newMonochromeWith(pix []byte, r image.Rectangle, stride int) (draw.Image, error) {
 	w, h := r.Dx(), r.Dy()
 	if stride == 0 {
 		stride = (w + 7) / 8
 	}
-	if len(pix) != stride*h {
+	if len(pix) < stride*h {
 		return nil, errors.New("ev3dev: bad pixel buffer length")
 	}
 	return &Monochrome{Pix: pix, Stride: stride, Rect: r}, nil
