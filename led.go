@@ -24,4 +24,15 @@ type led struct {
 	side  string
 }
 
-func (l led) String() string { return fmt.Sprintf("ev3:%s:%s:ev3dev", l.side, l.color) }
+func (l led) String() string {
+	var id int
+	switch l.side {
+	case "left":
+		id = 0
+	case "right":
+		id = 1
+	default:
+		panic("ev3: invalid LED side")
+	}
+	return fmt.Sprintf("led%d:%s:brick-status", id, l.color)
+}
