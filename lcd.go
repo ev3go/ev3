@@ -17,10 +17,10 @@ const (
 	LCDHeight = 128
 
 	// LCDStride is the width of the LCD screen memory in bytes.
-	LCDStride = 24
+	LCDStride = 712
 )
 
 // LCD is the draw image used draw directly to the ev3 LCD screen.
 // Drawing operations are safe for concurrent use, but are not atomic
 // beyond the pixel level. It must be initialized before use.
-var LCD = ev3dev.NewFrameBuffer("/dev/fb0", fb.NewMonochromeWith, LCDWidth, LCDHeight, LCDStride)
+var LCD = ev3dev.NewFrameBuffer("/dev/fb0", fb.NewXRGBWith, LCDWidth, LCDHeight, LCDStride)
