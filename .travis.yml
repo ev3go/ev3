@@ -1,15 +1,15 @@
 language: go
 go:
-  - 1.8.x
-  - 1.9.x
-  - 1.10.x
+  - 1.11.x
+  - 1.12.x
   
+env:
+  - GO111MODULE=on
+
 install:
-  - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
 script:
-  - go get -d -t -v ./...
   - go build -x -v ./...
   - go test -a -x -v ./...
   - diff <(gofmt -d .) <("")
